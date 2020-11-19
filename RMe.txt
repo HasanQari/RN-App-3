@@ -1,0 +1,226 @@
+React Native App ..............
+**--- THE MEALS APP ---**
+
+Section 7: State Management & Redux
+
+
+---------- WHAT LEARN ---------
+
+
+
+------------ Notes ------------
+
+- AppLoading: splash screen when the app starts until our fonts are loaded so that we only see something on the screen when all our assets, and in this case these are the fonts, are really available
+- navigation web vs native app :-
+   @ web: we enter URL and use react router tool to load user components 
+   @ Native App: the movement in app done by (Tab and stack) let user go and back between screen
+- react router: extra library installed that change the path in URL and load different component (allow user to move in web app by URL)
+- if use v4 or v5 of react navigation you need to  
+   @ StackNavigator
+      npm install --save react-navigation-stack
+      import { createStackNavigator } from 'react-navigation-stack';
+   @ TabsNavigator
+      npm install --save react-navigation-tabs
+      import { createBottomTabNavigator } from 'react-navigation-tabs';
+   @ DrawerNavigator
+      npm install --save react-navigation-drawer
+      import { createDrawerNavigator } from 'react-navigation-drawer';   
+   for v3 and lower no need
+- the push func: it push always to inside of a stack see Ex#1
+- when use pop or goBack Func it pop ele from stack that take you from current screen to next ele/screen in stack
+- popToTop: it func that skip lvl to back to the top of stack
+- replace: it replace the page to new one Ex) in login page won't let user back after logined 
+
+- when try to do some action can be effect on the state of app like filter or update content based on click the we need the Rudex !!
+- the Rudex consiste of 2 main part 
+   1- action: it take the required action/update on state from app -- component by dispatches to marked to reducer
+   2- reducer: is there to update the state in the end it developed by you write it
+
+------------ HOW TO -----------
+
+TO add font from expo ==>
+   1- run in cmd admin: expo install expo-font
+   2- in App.js import 2 things:
+      -- import * as Font from 'expo-font';
+      -- import {AppLoading} from 'expo';
+   3- create func to fetch font
+      const fetchFont = () => {
+         return Font.loadAsync({
+            'open-s': require('./assets/fonts/OpenSans-Regular.ttf'),
+            'open-s-b': require('./assets/fonts/OpenSans-Bold.ttf'),
+         });
+      };
+   4- import and call useState
+      -- import React, {useState} from 'react';
+      -- const [fontLoad,setFontLoad] = useState(false);
+   5- font loaded checker
+        if(!fontLoad){
+            return(
+               <AppLoading startAsync={fetchFont} onFinish={() => setFontLoad(true)} />
+            )
+         }
+
+
+TO create navigator ==>
+   1- create nav folder in the project
+   2- create nav file
+   3- use this link to download react-nav v3: https://reactnavigation.org/docs/3.x/getting-started
+   3- run this command in vs-code : 
+      -- npm install --save react-navigation-stack
+      -- npm install --save react-navigation-tabs
+      -- npm install --save react-navigation-drawer
+      OR use 1 command: npm install --save react-navigation@latest
+      AND install required dependencies in CMD admin:
+         expo install react-native-gesture-handler react-native-reanimated react-native-screens react-native-safe-area-context @react-native-community/masked-view
+   4- import this line in nav file: 
+      -- import { createStackNavigator } from 'react-navigation-stack';
+      -- import {createAppContainer} from 'react-navigation'
+   5- import screen you want to move between them
+   6- create var hold value of createStackNavigator
+   7- the value of createStackNavigator will be the screen that imported
+         const AppNavigator = createStackNavigator({
+            Category: CategScreen, // short form
+
+            CategoryMeals: {       // long form can add config 
+               screen: CategMealScreen
+            },
+            MealDetail: MealDetailScreen
+         }) 
+   8- export default createAppContainer(AppNavigator);
+   9- import nav file in app.js
+   10- use it as component
+
+
+TO Navigating Between Screens ==>
+   1- create a clickable way to move like button or img ..etc in current page or in page *A*
+   2- in page *A* in button set onPress with func
+   3- the function will be: () => {props.navigation.navigate({routeName: '*B*'})}
+      -- *B*: the page that want to navigate to it [alt: put the name of B justifyContent
+                                       props.navigation.navigate('*B*') ]
+   now you get way to move from A to Between
+
+
+TO create diff. page depend categ or class or content ==>
+   *-- after you have screens and you able to move beteewn them now:
+   1- import FlatList from rn and import fake data from you and import component related to screen
+   2- inside main screen func create const that get Params: const thingID = props.navigation.getParam('the name of identifyed data from pre-screen see ex#2') 
+   3- create: const selected@@@@ = DATA.find(x => x.id === **mealId**); ::: as ex#2 ::: this function to mach item.id or x.id to that const in step 3 ::: it depend on the logic needs
+   4- create render var and use imported component:
+         const renderItem = itemData => {return(<component someFunc={() => {...}} someAttr={itemData.item.var} />)}
+   5- in screen return use FlatList with data and renderItem attr:
+         return(<View><FlatList data={const of step 3} renderItem={func of step 4} /></View>)
+   *-- in component file that used or called in the screen:
+   6- create with tem#1 
+   7- import TouchableOpacity, TouchableNativeFeedback, Platform, from rn and Colors from your color file ** if want **
+   8- use if checker for OS type and version of android:
+            let TchableCmp = TouchableOpacity;
+            if (Platform.OS === 'android' && Platform.Version > 21) { TchableCmp = TouchableNativeFeedback; }
+   9- in main return use this heraricy -> <View><TchableCmp>...</TchableCmp></View>
+   10- in JSX code use props.@@@ to pass data from screen functions to component to play with it in JSX inside component then screen imported and render the play
+
+
+TO configer the navigationOptions ==> 
+   way1) in same screen file
+      1- use main const of screen to deal with it methods by: CategMealScreen.navigationOptions
+      2- see ex#3
+      3- if want add more option review offical docs of rn
+   way2) in Nav file
+      1- see tem#4
+
+
+
+----------- EXAMPLE -----------
+
+#1
+   props.navigation.navigate('pageA') // no any action
+   props.navigation.push('pageA') // loop/go to same page again push the page again and again in stack
+
+#2
+IN categMealScreen.js{
+   on button that will move to another screen onClick function e.g. :
+      onSelectMeal={() => {
+         props.navigation.navigate({
+            routeName: 'MealDetail',
+            params: {
+               **mealId**: itemData.item.id
+            }
+         });
+      }}
+}
+IN MealDetailScreen{
+   const mealId = props.navigation.getParam('**mealId**')
+}
+without stars ofcourse !!!!!!
+
+#3
+Screen.navigationOptions = navigationData => {
+    const ID = navigationData.navigation.getParam('the name of identifyed data from pre-screen see ex#2')
+    const selectedBTN = DATA.find(x => x.id === ID)
+    return { headerTitle: selectedBTN.title, } // the .title aleady def.ed in DATA
+}
+
+#4
+
+
+
+----------- TEMPLET -----------
+
+#1 screen / component structure:
+   import React from 'react';
+   import { StyleSheet, View, Text } from 'react-native';
+
+   const @@@@ = props => {
+      return (
+         <View style={styles.screen} >
+               <Text>Categories Screen</Text>
+         </View>
+      )
+   }
+
+   const styles = StyleSheet.create({
+      screen: {
+         flex: 1,
+         justifyContent: 'center',
+         alignItems: 'center',
+      }
+   });
+
+   export default @@@@;
+
+
+#2 create manaual back button: (inside func of onPress attr)
+   props.navigation.goBack(); OR props.navigation.pop();
+
+
+#3 back to main screen with skip the tree:
+   onPress={() => {props.navigation.popToTop();}}
+
+
+#4 App Navigation file structure:
+   import { createStackNavigator } from 'react-navigation-stack';
+   import { createAppContainer } from 'react-navigation';
+   import {Platform} from 'react-native';
+
+   import ScreenA from '../screens/ScreenA';
+   import ScreenB from '../screens/ScreenB';
+   import ScreenC from '../screens/ScreenC';
+
+   import Colors from '../constants/Colors';
+
+   const AppNavigator = createStackNavigator({
+      sA: {
+         screen: ScreenA,
+         navigationOptions: {headerTitle: 'Title of Screen'}
+      },
+      sB: ScreenB,
+      sC: ScreenC,
+   }, {
+      defaultNavigationOptions: { 
+         headerStyle: {
+            backgroundColor: Platform.OS === 'android' ? Colors.primary : '',
+         },
+         headerTintColor: Platform.OS === 'android' ? Colors.white : Colors.black
+      } // this will apply on all screens
+   })
+
+   export default createAppContainer(AppNavigator);
